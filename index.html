@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>便利屋かんたん概算見積もりシミュレーター｜便利屋ていねい本舗</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ヘッダー -->
+<header class="site-header">
+  <div class="header-inner">
+    <div class="logo-area">
+      <span class="logo-icon">🏠</span>
+      <div class="logo-text">
+        <span class="logo-main">便利屋ていねい本舗</span>
+        <span class="logo-sub">茨城県古河市</span>
+      </div>
+    </div>
+    <a href="tel:0280000000" class="header-tel">
+      <span class="tel-icon">📞</span>
+      <span class="tel-num">0280-XX-XXXX</span>
+    </a>
+  </div>
+</header>
+
+<!-- メインコンテンツ -->
+<main class="main-content">
+
+  <!-- ヒーロー -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="hero-badge">📋 無料・かんたん</div>
+      <h1 class="hero-title">概算見積もり<br>シミュレーター</h1>
+      <p class="hero-desc">サービスを選んで条件を入力するだけ！<br>概算料金がすぐにわかります。</p>
+      <div class="hero-steps">
+        <div class="step-item active" id="step-indicator-1">
+          <span class="step-num">1</span>
+          <span class="step-label">サービス選択</span>
+        </div>
+        <div class="step-arrow">›</div>
+        <div class="step-item" id="step-indicator-2">
+          <span class="step-num">2</span>
+          <span class="step-label">条件入力</span>
+        </div>
+        <div class="step-arrow">›</div>
+        <div class="step-item" id="step-indicator-3">
+          <span class="step-num">3</span>
+          <span class="step-label">料金確認</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Step 1: サービス選択 -->
+  <section class="step-section" id="step1">
+    <div class="container">
+      <div class="step-header">
+        <span class="step-badge">STEP 1</span>
+        <h2 class="step-title">ご依頼のサービスを選んでください</h2>
+      </div>
+      <div class="service-grid" id="serviceGrid">
+        <!-- JSで生成 -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Step 2: 条件入力 -->
+  <section class="step-section hidden" id="step2">
+    <div class="container">
+      <button class="back-btn" id="backToStep1">← サービス選択に戻る</button>
+      <div class="step-header">
+        <span class="step-badge">STEP 2</span>
+        <h2 class="step-title" id="step2Title">条件を選んでください</h2>
+        <div class="selected-service-label" id="selectedServiceLabel"></div>
+      </div>
+      <div class="questions-area" id="questionsArea">
+        <!-- JSで生成 -->
+      </div>
+      <div class="calc-btn-wrap">
+        <button class="calc-btn" id="calcBtn" onclick="calculateEstimate()">
+          <span>概算料金を計算する</span>
+          <span class="btn-arrow">→</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Step 3: 結果表示 -->
+  <section class="step-section hidden" id="step3">
+    <div class="container">
+      <button class="back-btn" id="backToStep2">← 条件入力に戻る</button>
+      <div class="step-header">
+        <span class="step-badge">STEP 3</span>
+        <h2 class="step-title">概算見積もり結果</h2>
+      </div>
+
+      <div class="result-card">
+        <div class="result-service-name" id="resultServiceName"></div>
+        <div class="result-conditions" id="resultConditions"></div>
+
+        <div class="result-price-area" id="resultPriceArea">
+          <!-- JSで生成 -->
+        </div>
+
+        <div class="result-notice">
+          <span class="notice-icon">⚠️</span>
+          <p>表示金額は概算です。作業環境、搬出距離、処分量、現地状況により料金は変動します。正式なお見積もりは現地確認後にご案内します。</p>
+        </div>
+      </div>
+
+      <!-- 問い合わせ導線 -->
+      <div class="contact-section">
+        <h3 class="contact-title">このままご相談・お見積もりへ</h3>
+        <div class="contact-buttons">
+          <a href="#" class="contact-btn line-btn" id="lineBtn">
+            <span class="btn-icon">💬</span>
+            <div class="btn-text">
+              <span class="btn-main">LINEで相談する</span>
+              <span class="btn-sub">24時間受付・かんたん</span>
+            </div>
+          </a>
+          <a href="tel:0280000000" class="contact-btn tel-btn">
+            <span class="btn-icon">📞</span>
+            <div class="btn-text">
+              <span class="btn-main">電話する</span>
+              <span class="btn-sub">0280-XX-XXXX</span>
+            </div>
+          </a>
+          <a href="#inquiryForm" class="contact-btn form-btn" id="formScrollBtn">
+            <span class="btn-icon">📝</span>
+            <div class="btn-text">
+              <span class="btn-main">フォームで依頼</span>
+              <span class="btn-sub">見積もり内容を引き継ぎ</span>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- 問い合わせフォーム -->
+      <div class="inquiry-form-section" id="inquiryForm">
+        <h3 class="form-title">📋 お見積もり依頼フォーム</h3>
+        <p class="form-subtitle">概算見積もり内容が自動で入力されます。</p>
+        <div class="form-wrap">
+          <div class="form-group">
+            <label class="form-label">お名前 <span class="required">必須</span></label>
+            <input type="text" class="form-input" id="customerName" placeholder="例：田中 太郎">
+          </div>
+          <div class="form-group">
+            <label class="form-label">電話番号 <span class="required">必須</span></label>
+            <input type="tel" class="form-input" id="customerPhone" placeholder="例：090-XXXX-XXXX">
+          </div>
+          <div class="form-group">
+            <label class="form-label">メールアドレス</label>
+            <input type="email" class="form-input" id="customerEmail" placeholder="例：taro@example.com">
+          </div>
+          <div class="form-group">
+            <label class="form-label">概算見積もり内容</label>
+            <textarea class="form-textarea" id="estimateContent" rows="6" readonly></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">ご要望・補足事項</label>
+            <textarea class="form-textarea" id="customerMessage" rows="4" placeholder="現地の状況、ご要望などをご記入ください。"></textarea>
+          </div>
+          <button class="submit-btn" onclick="submitForm()">
+            <span>送信する</span>
+            <span class="btn-arrow">→</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</main>
+
+<!-- フッター -->
+<footer class="site-footer">
+  <div class="footer-inner">
+    <p class="footer-name">便利屋ていねい本舗</p>
+    <p class="footer-addr">茨城県古河市｜対応エリア：古河市・境町・五霞町・八千代町・坂東市など</p>
+    <p class="footer-tel">📞 0280-XX-XXXX（受付 8:00〜20:00）</p>
+    <div class="footer-links">
+      <a href="admin.html">管理画面</a>
+    </div>
+    <p class="footer-copy">© 2025 便利屋ていねい本舗</p>
+  </div>
+</footer>
+
+<!-- 送信完了モーダル -->
+<div class="modal-overlay hidden" id="modalOverlay">
+  <div class="modal-box">
+    <div class="modal-icon">✅</div>
+    <h3 class="modal-title">送信完了しました！</h3>
+    <p class="modal-text">お問い合わせありがとうございます。<br>担当者より折り返しご連絡いたします。</p>
+    <button class="modal-close-btn" onclick="closeModal()">閉じる</button>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

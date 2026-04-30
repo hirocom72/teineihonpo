@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理画面｜便利屋かんたん概算見積もりシミュレーター</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=M+PLUS+Rounded+1c:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  body { background: #f4f6f8; }
+  .login-wrap {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .login-card {
+    background: white;
+    border-radius: 16px;
+    padding: 36px 28px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.12);
+    text-align: center;
+  }
+  .login-title { font-size: 20px; font-weight: 800; color: #2d6a4f; margin-bottom: 6px; }
+  .login-sub { font-size: 13px; color: #5a7060; margin-bottom: 24px; }
+  .login-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; text-align: left; }
+  .login-label { font-size: 13px; font-weight: 700; color: #2c3e2e; }
+  .login-input {
+    width: 100%; padding: 12px 14px; border: 2px solid #e9ecef;
+    border-radius: 8px; font-size: 15px; font-family: 'M PLUS Rounded 1c', sans-serif;
+  }
+  .login-input:focus { outline: none; border-color: #40916c; }
+  .login-btn {
+    width: 100%; background: linear-gradient(135deg, #40916c, #2d6a4f);
+    color: white; border: none; border-radius: 50px; padding: 14px;
+    font-size: 15px; font-weight: 800; cursor: pointer; margin-top: 8px;
+    font-family: 'M PLUS Rounded 1c', sans-serif;
+  }
+  .login-error { color: #e74c3c; font-size: 13px; margin-top: 8px; display: none; }
+  .admin-body { display: none; }
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+  .price-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+  .price-label-cell { font-size: 13px; font-weight: 700; color: #2c3e2e; min-width: 200px; flex: 1; }
+  .price-input-cell { display: flex; align-items: center; gap: 6px; }
+  .price-input-cell .admin-input { width: 120px; }
+  .price-unit { font-size: 12px; color: #6c757d; }
+  .service-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid #e9ecef; }
+  .service-row:last-child { border-bottom: none; }
+  .service-order-input { width: 50px; }
+  .multiplier-group { display: flex; align-items: center; gap: 6px; }
+  .multiplier-input { width: 70px; }
+  .section-label-row { font-size: 11px; color: #6c757d; font-weight: 700; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .reset-confirm { background: #fff3cd; border: 1.5px solid #ffc107; border-radius: 8px; padding: 12px; margin-bottom: 14px; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<!-- ログイン画面 -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-card">
+    <div style="font-size:36px; margin-bottom:12px;">🔐</div>
+    <h1 class="login-title">管理画面ログイン</h1>
+    <p class="login-sub">便利屋かんたん概算見積もりシミュレーター</p>
+    <div class="login-group">
+      <label class="login-label">メールアドレス</label>
+      <input type="email" class="login-input" id="loginEmail" value="admin@benriya.com" placeholder="admin@example.com">
+    </div>
+    <div class="login-group">
+      <label class="login-label">パスワード</label>
+      <input type="password" class="login-input" id="loginPassword" placeholder="パスワード">
+    </div>
+    <p class="login-error" id="loginError">メールアドレスまたはパスワードが違います。</p>
+    <button class="login-btn" onclick="doLogin()">ログイン</button>
+    <p style="margin-top:14px; font-size:11px; color:#adb5bd;">初期パスワード: admin123</p>
+  </div>
+</div>
+
+<!-- 管理画面 -->
+<div class="admin-body" id="adminBody">
+
+  <header class="admin-header">
+    <span style="font-size:20px;">⚙️</span>
+    <h1>管理画面｜便利屋かんたん概算見積もりシミュレーター</h1>
+    <div style="margin-left:auto; display:flex; gap:8px; align-items:center;">
+      <a href="index.html" style="color:rgba(255,255,255,0.7); font-size:12px; text-decoration:none;">← お客様画面</a>
+      <button class="admin-btn secondary" onclick="doLogout()" style="padding:6px 12px; font-size:11px;">ログアウト</button>
+    </div>
+  </header>
+
+  <nav class="admin-nav">
+    <a href="#" class="active" onclick="showTab('services', this)">サービス管理</a>
+    <a href="#" onclick="showTab('pricing', this)">料金ルール</a>
+    <a href="#" onclick="showTab('settings', this)">全体設定</a>
+    <a href="#" onclick="showTab('reset', this)">リセット</a>
+  </nav>
+
+  <main class="admin-main">
+
+    <!-- タブ：サービス管理 -->
+    <div class="tab-content active" id="tab-services">
+      <div class="admin-section">
+        <div class="admin-section-title">📋 サービス一覧・設定</div>
+        <div id="servicesList"></div>
+      </div>
+    </div>
+
+    <!-- タブ：料金ルール -->
+    <div class="tab-content" id="tab-pricing">
+      <div class="admin-section">
+        <div class="admin-section-title">💴 サービス選択</div>
+        <div style="display:flex; flex-wrap:wrap; gap:8px;" id="pricingServiceTabs"></div>
+      </div>
+      <div class="admin-section" id="pricingEditArea">
+        <div class="admin-section-title" id="pricingEditTitle">サービスを選択してください</div>
+        <div id="pricingFields"></div>
+      </div>
+    </div>
+
+    <!-- タブ：全体設定 -->
+    <div class="tab-content" id="tab-settings">
+      <div class="admin-section">
+        <div class="admin-section-title">🏢 店舗情報</div>
+        <div style="display:flex; flex-direction:column; gap:14px;">
+          <div>
+            <label class="login-label" style="display:block; margin-bottom:6px;">店舗名</label>
+            <input type="text" class="admin-input" id="settingShopName" value="便利屋ていねい本舗">
+          </div>
+          <div>
+            <label class="login-label" style="display:block; margin-bottom:6px;">電話番号</label>
+            <input type="text" class="admin-input" id="settingPhone" value="0280-XX-XXXX">
+          </div>
+          <div>
+            <label class="login-label" style="display:block; margin-bottom:6px;">LINE公式アカウントURL</label>
+            <input type="text" class="admin-input" id="settingLine" value="https://line.me/R/ti/p/@xxxxxx">
+          </div>
+          <div>
+            <label class="login-label" style="display:block; margin-bottom:6px;">概算注意文（お客様画面に表示）</label>
+            <textarea class="admin-input" id="settingNotice" rows="3" style="resize:vertical;">表示金額は概算です。作業環境、搬出距離、処分量、現地状況により料金は変動します。正式なお見積もりは現地確認後にご案内します。</textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- タブ：リセット -->
+    <div class="tab-content" id="tab-reset">
+      <div class="admin-section">
+        <div class="admin-section-title">🔄 データリセット</div>
+        <div class="reset-confirm">
+          ⚠️ リセットすると、管理画面で変更した料金・設定がすべて初期値に戻ります。この操作は取り消せません。
+        </div>
+        <button class="admin-btn danger" onclick="confirmReset()">すべての料金データを初期値にリセット</button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- 保存バー -->
+  <div class="admin-save-bar">
+    <span class="save-status" id="saveStatus">変更が保存されました</span>
+    <button class="admin-btn" onclick="saveAll()" style="padding:10px 28px; font-size:14px;">💾 変更を保存する</button>
+  </div>
+
+</div>
+
+<script src="data.js"></script>
+<script>
+// ============================================================
+// ログイン
+// ============================================================
+const ADMIN_EMAIL = 'admin@benriya.com';
+const ADMIN_PASS = 'admin123';
+let isLoggedIn = false;
+let appData = null;
+
+function doLogin() {
+  const email = document.getElementById('loginEmail').value;
+  const pass = document.getElementById('loginPassword').value;
+  if (email === ADMIN_EMAIL && pass === ADMIN_PASS) {
+    isLoggedIn = true;
+    document.getElementById('loginWrap').style.display = 'none';
+    document.getElementById('adminBody').style.display = 'block';
+    appData = AppData.get();
+    initAdmin();
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+  }
+}
+
+function doLogout() {
+  isLoggedIn = false;
+  document.getElementById('loginWrap').style.display = 'flex';
+  document.getElementById('adminBody').style.display = 'none';
+}
+
+// ============================================================
+// タブ切替
+// ============================================================
+function showTab(tabId, link) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.admin-nav a').forEach(a => a.classList.remove('active'));
+  document.getElementById(`tab-${tabId}`).classList.add('active');
+  if (link) link.classList.add('active');
+}
+
+// ============================================================
+// 初期化
+// ============================================================
+function initAdmin() {
+  renderServicesList();
+  renderPricingServiceTabs();
+}
+
+// ============================================================
+// サービス一覧
+// ============================================================
+function renderServicesList() {
+  const container = document.getElementById('servicesList');
+  container.innerHTML = appData.services
+    .sort((a, b) => a.display_order - b.display_order)
+    .map(s => `
+      <div class="service-row" data-id="${s.id}">
+        <span style="font-size:20px;">${s.icon}</span>
+        <span style="font-weight:700; min-width:120px;">${s.name}</span>
+        <div style="display:flex; align-items:center; gap:6px; margin-left:auto; flex-wrap:wrap;">
+          <span style="font-size:11px; color:#6c757d;">表示順</span>
+          <input type="number" class="admin-input service-order-input" 
+            value="${s.display_order}" min="1" max="99"
+            onchange="updateServiceOrder('${s.id}', this.value)">
+          <span style="font-size:11px; color:#6c757d;">要現地確認</span>
+          <button class="toggle-switch ${s.requires_site_visit ? 'on' : ''}"
+            onclick="toggleSiteVisit('${s.id}', this)"></button>
+          <span style="font-size:11px; color:#6c757d;">表示</span>
+          <button class="toggle-switch ${s.is_active ? 'on' : ''}"
+            onclick="toggleActive('${s.id}', this)"></button>
+        </div>
+      </div>
+    `).join('');
+}
+
+function updateServiceOrder(id, value) {
+  const s = appData.services.find(s => s.id === id);
+  if (s) s.display_order = parseInt(value);
+  markUnsaved();
+}
+
+function toggleSiteVisit(id, btn) {
+  const s = appData.services.find(s => s.id === id);
+  if (s) {
+    s.requires_site_visit = !s.requires_site_visit;
+    btn.classList.toggle('on', s.requires_site_visit);
+    markUnsaved();
+  }
+}
+
+function toggleActive(id, btn) {
+  const s = appData.services.find(s => s.id === id);
+  if (s) {
+    s.is_active = !s.is_active;
+    btn.classList.toggle('on', s.is_active);
+    markUnsaved();
+  }
+}
+
+// ============================================================
+// 料金ルール
+// ============================================================
+function renderPricingServiceTabs() {
+  const container = document.getElementById('pricingServiceTabs');
+  container.innerHTML = appData.services
+    .filter(s => s.is_active)
+    .sort((a, b) => a.display_order - b.display_order)
+    .map(s => `
+      <button class="admin-btn secondary" style="font-size:13px;"
+        onclick="editPricing('${s.id}', this)">
+        ${s.icon} ${s.name}
+      </button>
+    `).join('');
+}
+
+function editPricing(serviceId, btn) {
+  document.querySelectorAll('#pricingServiceTabs .admin-btn').forEach(b => b.classList.remove('active'));
+  if (btn) { btn.style.background = '#2d6a4f'; btn.style.color = 'white'; }
+
+  const service = appData.services.find(s => s.id === serviceId);
+  const pricing = appData.pricing[serviceId];
+  document.getElementById('pricingEditTitle').textContent = `${service.icon} ${service.name} の料金設定`;
+
+  const fields = document.getElementById('pricingFields');
+  fields.innerHTML = '';
+
+  // 価格幅設定
+  fields.innerHTML += `
+    <div style="margin-bottom:20px; padding-bottom:16px; border-bottom:1.5px solid #e9ecef;">
+      <div class="section-label-row">料金表示の幅（倍率）</div>
+      <div class="price-row">
+        <span class="price-label-cell">最小倍率（概算最低額）</span>
+        <div class="price-input-cell">
+          <input type="number" class="admin-input multiplier-input" step="0.05" min="0.5" max="2"
+            value="${service.price_range_multiplier_min}"
+            onchange="updateServiceMultiplier('${serviceId}', 'min', this.value)">
+          <span class="price-unit">倍</span>
+        </div>
+      </div>
+      <div class="price-row">
+        <span class="price-label-cell">最大倍率（概算最高額）</span>
+        <div class="price-input-cell">
+          <input type="number" class="admin-input multiplier-input" step="0.05" min="0.5" max="3"
+            value="${service.price_range_multiplier_max}"
+            onchange="updateServiceMultiplier('${serviceId}', 'max', this.value)">
+          <span class="price-unit">倍</span>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // サービスごとの料金フィールド
+  fields.innerHTML += buildPricingFields(serviceId, pricing);
+}
+
+function buildPricingFields(serviceId, pricing) {
+  if (!pricing) return '<p>料金データがありません</p>';
+
+  let html = '<div class="section-label-row">料金項目</div>';
+
+  const flat = flattenPricing(pricing);
+  flat.forEach(item => {
+    html += `
+      <div class="price-row">
+        <span class="price-label-cell">${item.label}</span>
+        <div class="price-input-cell">
+          <input type="number" class="admin-input" style="width:120px;"
+            value="${item.value}" min="0"
+            onchange="updatePricing('${serviceId}', '${item.path}', this.value)">
+          <span class="price-unit">円</span>
+        </div>
+      </div>
+    `;
+  });
+
+  return html;
+}
+
+function flattenPricing(pricing, prefix = '') {
+  const items = [];
+  for (const key in pricing) {
+    const val = pricing[key];
+    const path = prefix ? `${prefix}.${key}` : key;
+
+    if (typeof val === 'number') {
+      items.push({ label: formatPricingLabel(key), value: val, path });
+    } else if (typeof val === 'object' && val !== null && !Array.isArray(val)) {
+      const sub = flattenPricing(val, path);
+      if (sub.length > 0) {
+        items.push({ label: `── ${formatPricingLabel(key)} ──`, value: null, path: null });
+        items.push(...sub);
+      }
+    }
+  }
+  return items;
+}
+
+function formatPricingLabel(key) {
+  const map = {
+    base: '基本料金', area_unit_price: '面積単価（1㎡）',
+    low: '低い', normal: '普通', high: '高い', very_high: 'かなり伸びている',
+    none: 'なし', yes: 'あり', easy: '作業しやすい', hard: '困難',
+    under3: '3m未満', '3to5': '3〜5m', '5to8': '5〜8m', over8: '8m以上',
+    thin: '幹：細い', thick: '幹：太い',
+    small: '少量/小', half: '軽トラ半分', full: '軽トラ1台', '2ton': '2トン車',
+    some: '少しあり', many: '多い', '2f': '2階', '3f': '3階以上',
+    '1k': '1K〜1DK', '1ldk': '1LDK〜2DK', '2ldk': '2LDK〜3DK', house: '一戸建て',
+    wood: '木造', steel: '鉄骨', rc: 'RC造',
+    exterior: '外観確認のみ', ventilation: '換気あり', cleaning: '清掃あり', garden: '庭確認あり',
+    local: '古河市内', near: '周辺市町村', far: '遠方',
+    '1': '月1回', '2': '月2回', '4': '週1回',
+    middle: '中木/中', premium: '高級',
+    standard: '一般/標準', surface: '表替え', reverse: '裏返し', new: '新調',
+    slow: '流れが悪い', full: '完全詰まり', foreign: '異物', overflow: 'あふれそう',
+    night: '夜間・早朝', emergency: '緊急',
+    kitchen: 'キッチン', bath: '浴室', toilet: 'トイレ', wash: '洗面所', fan: '換気扇', aircon: 'エアコン', whole: '空室全体',
+    light: '汚れ：軽い', heavy: '汚れ：強い',
+    wallpaper_unit: 'クロス（1㎡）', floor_unit: '床（1㎡）', partial_base: '部分補修',
+    fence: 'フェンス', parking: '駐車場', gravel: '砂利', block: 'ブロック', other: 'その他',
+    repair: '修理・補修', moving: '荷物移動', handyman: '電球交換等',
+    '1h': '1〜2時間', half: '半日', '1day': '1日', multi: '複数日',
+    carport: 'カーポート', shed: '物置',
+  };
+  return map[key] || key;
+}
+
+function updatePricing(serviceId, path, value) {
+  const keys = path.split('.');
+  let obj = appData.pricing[serviceId];
+  for (let i = 0; i < keys.length - 1; i++) {
+    obj = obj[keys[i]];
+  }
+  obj[keys[keys.length - 1]] = parseFloat(value) || 0;
+  markUnsaved();
+}
+
+function updateServiceMultiplier(serviceId, type, value) {
+  const service = appData.services.find(s => s.id === serviceId);
+  if (!service) return;
+  if (type === 'min') service.price_range_multiplier_min = parseFloat(value) || 1.0;
+  if (type === 'max') service.price_range_multiplier_max = parseFloat(value) || 1.3;
+  markUnsaved();
+}
+
+// ============================================================
+// 保存・リセット
+// ============================================================
+let unsaved = false;
+function markUnsaved() {
+  unsaved = true;
+  document.getElementById('saveStatus').textContent = '⚠️ 未保存の変更があります';
+  document.getElementById('saveStatus').style.color = '#e07b39';
+}
+
+function saveAll() {
+  AppData.save(appData);
+  unsaved = false;
+  document.getElementById('saveStatus').textContent = '✅ 変更を保存しました';
+  document.getElementById('saveStatus').style.color = '#2d6a4f';
+}
+
+function confirmReset() {
+  if (confirm('すべての料金データを初期値にリセットします。よろしいですか？\n（この操作は取り消せません）')) {
+    appData = AppData.reset();
+    AppData.save(appData);
+    initAdmin();
+    alert('リセットしました。');
+  }
+}
+
+// ============================================================
+// キーボードイベント
+// ============================================================
+document.getElementById('loginPassword').addEventListener('keydown', e => {
+  if (e.key === 'Enter') doLogin();
+});
+</script>
+</body>
+</html>
