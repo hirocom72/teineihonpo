@@ -58,6 +58,7 @@ function selectService(serviceId) {
 
   // ステップ遷移
   showStep(2);
+  document.getElementById('step2').scrollIntoView({ behavior: 'smooth', block: 'start' });
   document.getElementById('step2Title').textContent = `${service.icon} ${service.name}の条件を選んでください`;
   document.getElementById('selectedServiceLabel').innerHTML = `
     <span class="service-chip">${service.icon} ${service.name}</span>
